@@ -1,0 +1,15 @@
+{
+  "name":"dbs_test",
+  "version": "2.0.0",
+  "description": "数据库课程实验的“demo、空工程”的包依赖，基于node v12.22.12生成",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "co": "^4.6.0",
+    "cookie-parser": "^1.4.6",
+    "express-session": "^1.17.3",
+    "iconv-lite": "^0.6.3",
+    "log4js": "^6.9.1",
+    "serve-static": "^1.15.0",
+    "sqlite3": "^5.1.6"
+  }
+}

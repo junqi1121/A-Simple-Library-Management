@@ -1,0 +1,36 @@
+<html>
+<head>
+<META HTTP-EQUIV="Content-Type" Content="text-html; charset=utf-8">
+<script language=JScript>
+function check()
+{
+	if(freg.uname.value=="")
+	{
+		alert("用户名不能为空");
+		return;
+	}
+	if(freg.pwd.value!=freg.pwd2.value)
+	{
+		alert("两次输入密码不同！");
+		return;
+	}
+	freg.submit();
+}
+</script>
+<title>无标题文档</title>
+</head>
+
+<body>
+<center>
+<form name='freg' action='register' method='post'>
+  <strong>注册</strong>
+  <table>
+<tr><td align=right>用户名：</td><td><input name="uname" type="text" value="" maxlength="10"></td></tr>
+<tr><td align=right>密码：</td><td><input name="pwd" type="password" id="pwd" value="" maxlength="10"></td></tr>
+<tr><td align=right>重复密码：</td><td><input name="pwd2" type="password" id="pwd2" value="" maxlength="10"></td></tr>
+<tr><td colspan=2 align=right><input type=button onclick='javascript:check()' value='提交'></td></tr>
+</table>
+</form>
+</center>
+</body>
+</html>

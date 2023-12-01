@@ -1,0 +1,12 @@
+{
+  "name":"03_static",
+  "version": "2.0",
+  "description": "数据库课程实验的“demo”中03_static的包依赖，基于node v12.22.12生成",
+  "private": true,
+  "scripts": {
+    "start": "node 03_static.js"
+  },
+  "dependencies": {
+    "serve-static": "^1.15.0"
+  }
+}

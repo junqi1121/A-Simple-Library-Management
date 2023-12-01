@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "BBS",
+            "type": "node",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}\\bbs\\bbs.js",
+            "cwd": "${workspaceFolder}\\bbs",
+            "runtimeExecutable": "E:\\23秋资料\\数据库\\实验用nodejs工程们\\node\\node.exe"
+        },
+        {
+            "name": "图书馆空工程",
+            "type": "node",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}\\图书馆空工程\\app.js",
+            "cwd": "${workspaceFolder}\\图书馆空工程",
+            "runtimeExecutable": "E:\\23秋资料\\数据库\\实验用nodejs工程们\\node\\node.exe"
+        }
+    ]
+}

@@ -1,0 +1,299 @@
+<html style="font:normal 3vmin/2em 'Tahoma',微软雅黑;">
+<head>
+<title>NodeJS工程运行调试说明</title>
+<script language="javascript">
+function Onload(){
+	edFnt.value=document.documentElement.style.fontSize;
+	var lst=document.getElementsByTagName('li');
+	for(var li of lst){
+		if(!li.nextElementSibling || ['OL','UL'].indexOf(li.nextElementSibling.tagName)<0) continue;
+		var s=document.createElement('s');
+		s.onclick=Expand;
+		li.setAttribute("off","");
+		li.insertBefore(s,li.firstChild);
+	}
+}
+function Expand(e){
+	var li=e.target.parentNode;
+	if(null==li.getAttribute("off"))
+		li.setAttribute("off","");
+	else
+		li.removeAttribute("off");
+}
+function ChgFnt(){
+	document.documentElement.style.fontSize=edFnt.value;
+}
+function ExpandAll(stat){//收起或展开所有
+	var lst=document.getElementsByTagName('li');
+	for(var li of lst){
+		if(!li.firstChild || 'S'!=li.firstChild.tagName) continue;
+		var s=document.createElement('s');
+		s.onclick=Expand;
+		if(stat)
+			li.removeAttribute("off");
+		else
+			li.setAttribute("off","");
+	}
+}
+</script>
+<style>
+.tool{display:block;position:fixed;right:.3em;top:.3em;width:2em;height:2em;
+	border-radius:1.5em;padding:.5em;z-index:9999;
+	opacity:.5;box-shadow:0 0 .3em #000;background:#fff;overflow:hidden;
+	font:normal 12px/2em 微软雅黑;text-align:center;
+	transition: all .3s;cursor:default
+}
+.tool:hover{width:6em;height:8.56em;border-radius:.1em;opacity:1}
+.tool>[big],.tool:hover>[small]{display:none}
+.tool:hover>[big]{display:block}
+.tool>[big]>*{display:block;padding:.5em 0;width:100%}
+.tool>[big]>a:hover{background:#08f;color:#fff}
+
+h1{text-align:center;font-size:2em;line-height:1.5em;}
+ul,ol{padding-left:2em}
+*[c-r]{color:red !important}
+*[c-g]{color:#080 !important}
+*[c-b]{color:#00f !important}
+*[c-f80]{color:#f80 !important}
+*[c-808]{color:#808 !important}
+*[c-f08]{color:#f08 !important}
+i{color:#090;font-weight:normal;font-size:0.8em;margin-left:.5em}
+
+li{font-weight:bold;position:relative;margin-left:1em;line-height:2em}
+li:not([lst]){list-style:none}
+body>li{font-size:1.6em;}
+ul>li,ol>li{font-size:1.4em}
+*>li+ul>li,*>li+ol>li{font-size:1.2em}
+*>li+*>li+ul li,*>li+*>li+ol li{font-size:1em}
+li[s]{font-weight:normal}
+li>s:first-child{
+	display:inline-block;width:1em;height:1em;position:absolute;left:-1em;top:.5em;
+	text-align:center;text-decoration:none;line-height:1em;color:#666;
+	transform:rotate(90deg);
+}
+li[off]+ul,li[off]+ol{display:none}
+li>s:first-child{transition:all .3s;}
+li>s:first-child::before{content:">";font:bold .8em/1.25em 黑体}
+li[off]>s:first-child{transform:none;}
+
+[ico]{padding-left:1.1em;background:url(
+	data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAyNCAxMDI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGZpbGw9IiM2YWQiIGQ9Ik04ODggMzE0TDY5MCAxMTZhMjAgMjAgMCAwMC0yOCAyOWwxNjMgMTYzSDYwOVY0M2MwLTEyLTktMjEtMjEtMjFIMTgwYy0xMSAwLTIwIDktMjAgMjF2OTM4YzAgMTIgOSAyMSAyMCAyMWg2OTRjMTEgMCAyMC05IDIwLTIxVjMyOGMwLTUtMi0xMC02LTE0em0tMzQgNjQ3SDIwMVY2M2gzNjd2MjY1YzAgMTIgOSAyMSAyMCAyMWgyNjZ2NjEyeiIvPjwvc3ZnPg==) no-repeat 0 .5em/auto 1em;
+}
+[ioc]:not(li){white-space:nowrap}
+*:not(li)[ico]{display:inline-block;}
+[ico="rar"]{background-image:url(
+	data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAyNCAxMDI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik0wIDUxMmgxMDI0djMzM2MwIDYyLTcgODUtMTkgMTA4YTEyNyAxMjcgMCAwMS01MiA1MmMtMjMgMTMtNDYgMTktMTA4IDE5SDE3OWMtNjIgMC04NS03LTEwOC0xOWExMjcgMTI3IDAgMDEtNTItNTJDNiA5MzAgMCA5MDcgMCA4NDVWNTEyeiIgZmlsbD0iIzVDQkMwNCIvPjxwYXRoIGQ9Ik0xNzkgMGg2NjZjNjIgMCA4NSA3IDEwOCAxOSAyMiAxMiA0MCAzMCA1MiA1MiAxMyAyMyAxOSA0NiAxOSAxMDh2MzMzSDBWMTc5YzAtNjIgNy04NSAxOS0xMDhhMTI3IDEyNyAwIDAxNTItNTJDOTQgNiAxMTcgMCAxNzkgMHoiIGZpbGw9IiM0N0E2RkYiLz48cGF0aCBkPSJNMzg0IDBoMjU2djEwMjRIMzg0eiIgZmlsbD0iI0ZDMCIvPjxwYXRoIGQ9Ik0wIDMzM2gxMDI0djM1OEgweiIgZmlsbD0iI0VBMzQwRiIvPjxwYXRoIGQ9Ik02NjYgNDEwdjIwNEgzNThWNDEwaDMwOHoiIGZpbGw9IiNGQzAiLz48L3N2Zz4=)}
+[ico="folder"]{background-image:url(
+	data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAyNCAxMDI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik05MTkgODgzSDEwNGMtMjEgMC0zOS0xNi0zOS0zNVYyNzdjMC0xOSAxOC0zNSAzOS0zNWg4MTVjMjEgMCAzOSAxNiAzOSAzNXY1NzFjMCAxOS0xOCAzNS0zOSAzNXoiIGZpbGw9IiNGRkU5QjQiLz48cGF0aCBkPSJNNTEyIDQxMUg2NVYyMTBjMC0yMSAxOC0zOSAzOS0zOWgzMDZjMTggMCAzMyAxMSAzOCAyOGw2NCAyMTJ6IiBmaWxsPSIjRkZCMDJDIi8+PHBhdGggZD0iTTkxOSA4ODNIMTA0Yy0yMSAwLTM5LTE4LTM5LTM5VjMzNWMwLTIxIDE4LTM5IDM5LTM5aDgxNWMyMSAwIDM5IDE4IDM5IDM5djUwOWMwIDIxLTE4IDM5LTM5IDM5eiIgZmlsbD0iI0ZGQ0EyOCIvPjwvc3ZnPg==)}
+[ico="nodejs"]{background-image:url(
+	data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAyNCAxMDI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGZpbGw9IiM4ZjAiIGQ9Ik00ODggN0w4OCAyMzhjLTE1IDktMjQgMjUtMjQgNDJ2NDY0YzAgMTcgOSAzMyAyNCA0Mmw0MDAgMjMxYzE1IDkgMzMgOSA0OCAwbDQwMC0yMzFhNDkgNDkgMCAwMDI0LTQyVjI4MGMwLTE3LTktMzMtMjQtNDJMNTM2IDZhNDggNDggMCAwMC00OCAwIi8+PHBhdGggZmlsbD0iIzA4MCIgZD0iTTg3OSAyNDZMNTUxIDUwbC05LTUtMTAtM2E4MCA4MCAwIDAwLTQwIDAgOTAgOTAgMCAwMC0xOSA4TDE0NSAyNDZsLTggNi04IDctNiA4LTYgOS00IDktMyAxMC0yIDEwLTEgMTF2MzkyYTkzIDkzIDAgMDAzIDIxIDgwIDgwIDAgMDAzNSA0OWw4NiA1MWgxYzQzIDIzIDYwIDIzIDc5IDIzIDY4IDAgMTEwLTQ0IDExMC0xMTVWMzUybC0xLTMtMi0zLTItMy0zLTItMy0yLTMtMWgtNTRsLTQgMS0zIDItMiAyLTIgMy0yIDMtMSAzdjM4NWwtMSA4LTMgN2EzMCAzMCAwIDAxLTExIDEyYy0xMiA4LTMwIDYtNTEtNWwtODItNDktMS0yVjMyMWwxLTIgMzIwLTE5NmgybDMyMCAxOTYgMSAydjM4N2wtMSAyLTMyMSAxOTJoLTFsLTgyLTQ5YTE2IDE2IDAgMDAtOC0zbC01IDEtNCAxdjFjLTIzIDEzLTI5IDE2LTUwIDI0LTMgMS0xMSA0LTEyIDEyczcgMTQgMTQgMThsMTA5IDY3YTc3IDc3IDAgMDAzOSAxMWgxYTgxIDgxIDAgMDAzOC0xMWwzMjctMTk2IDktNiA3LTcgNy04IDYtOSA0LTkgMy0xMGE5MiA5MiAwIDAwMy0yMVYzMTVhOTMgOTMgMCAwMC0zLTIwIDgwIDgwIDAgMDAtMzUtNDl6Ii8+PHBhdGggZmlsbD0iIzA4MCIgZD0iTTYyMSA2NDNjLTc4IDAtOTUtMjItMTAwLTU4bC0xLTMtMS0zLTItMi0yLTMtMi0xLTMtMi0zLTFoLTQ4bC00IDEtMyAyLTIgMi0zIDMtMSAzLTEgNHYzYzAgMzEgMTAgMTMxIDE3NyAxMzEgNTEgMCA5NC0xMiAxMjMtMzUgMzAtMjIgNDUtNTUgNDUtOTUgMC03OS01MS0xMDEtMTUzLTExNS0xMDMtMTQtMTAzLTIyLTEwMy0zOCAwLTExIDAtMzggNzQtMzggNTQgMCA4MiA2IDkxIDQybDEgMyAxIDIgMiAzIDIgMiAzIDEgMiAxIDMgMWg0NWw3LTFhMTggMTggMCAwMDEwLTExbDEtN2MtNi03NS02MS0xMTMtMTY4LTExMy05NyAwLTE1NSA0NC0xNTUgMTE3IDAgODAgNjAgMTAzIDE1MSAxMTIgMTA1IDExIDEwNSAyNyAxMDUgNDEgMCAyMy05IDUyLTg4IDUyeiIvPjwvc3ZnPg==)}
+[ico="vscode"]{background-image:url(
+	data:image/svg+xml;base64,PHN2ZyBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTg0IDBoNjU2cTE4NCAwIDE4NCAxODR2NjU2cTAgMTg0LTE4NCAxODRIMTg0UTAgMTAyNCAwIDg0MFYxODRRMCAwIDE4NCAweiIgZmlsbD0iI0ZGRiIvPjxwYXRoIGQ9Ik03MDkgMTYybDEzNyA2N2MyMSAxMSAyNCAxOSAyNCAzMGwxIDUwNmMwIDEzLTggMTktMjggMzBsLTEzNCA2N2MtNSAzLTEwIDYtNDMgNiAwIDAgMjkgMCAyOS0yM1YxODJhMjUgMjUgMCAwMC0yNC0yNmMyOSAwIDM4IDYgMzggNnoiIGZpbGw9IiM0QjlBRTkiLz48cGF0aCBkPSJNMTYzIDYxM2EyOSAyOSAwIDAwMCAzOWw0NiA0MmMxMSA5IDI2IDUgMzUtMmw0NTEtMzQ0VjE4MmEyNSAyNSAwIDAwLTI0LTI2IDE4IDE4IDAgMDAtMTMgNnoiIGZpbGw9IiMyQTYzQTQiLz48cGF0aCBkPSJNMjA5IDMzMmEyMyAyMyAwIDAxMzIgMGw0NTQgMzQzdjE3MGMwIDIzLTI5IDIzLTI5IDIzYTE3IDE3IDAgMDEtMTAtNkwxNjAgNDA4YTIyIDIyIDAgMDEwLTMxeiIgZmlsbD0iIzM0NzhDNiIvPjwvc3ZnPg==)}
+
+[tag]{position:relative}
+[tag]::before{content:attr(tag);background:#666;color:#fff;
+	display:inline-block;position:absolute;left:0;top:.9em;padding:.2em .2em;
+	transform:scale(0.3);transform-origin:0 0;font:bold 1em/1em "tahoma";text-align:center;
+}
+[tag="HTM"]::before{background:#f80;}
+[tag="CSS"]::before{background:#080;}
+[tag="JSON"]::before{background:#808;}
+[tag="JS"]::before{background:#08f;}
+
+[cmd]{display:block;background:#000;color:#fff;
+	font:bold 1em/2em 宋体;padding:.5em 1em;border-radius:.5em;margin-top:.5em
+}
+[cmd] i{color:#4f4;}
+[cmd]:not([showi]) i{opacity:0}
+[cmd]:hover i{opacity:1}
+[code]{font-family:'Courier New',幼圆,等线;color:#00f;font-weight:bold}
+
+q,q::before,q::after{font-family:'Courier New',幼圆,等线;content:'';color:#f40;font-weight:bold};
+</style>
+</head>
+<body onload="Onload()">
+<div class="tool">
+	<div small style="text-align:center;font:bold 2em/1em 黑体">≡</div>
+	<div big>
+		<a onclick="ExpandAll(0)">全收起</a>
+		<a onclick="ExpandAll(1)">全展开</a>
+		<select id="edFnt" onchange="ChgFnt()">
+			<option>14px</option>
+			<option>16px</option>
+			<option>18px</option>
+			<option>20px</option>
+			<option>2vmin</option>
+			<option>3vmin</option>
+			<option>4vmin</option>
+			<option>2vw</option>
+			<option>3vw</option>
+			<option>4vw</option>
+		</select>
+	</div>
+</div>
+<h1>NodeJS工程运行调试说明</h1>
+<li>特别说明</li>
+<ul>
+　　本文部分内容是基于数据库实验课环境中老师（就是本文作者！）提供的各种资源进行的说明，不具有通用性。<br>
+　　如有不知道“命令行”、“控制台程序”这两个概念以及不知道如何启动“命令行界面”的计算机专业同学，拖出去……做掉！……然后百度1024次！
+</ul>
+<li>nodejs项目(工程)的运行和调试环境搭建</li>
+<ul>
+	<li>安装</li>
+	<ul>
+		<li>nodejs是绿色的，无需安装。</li>
+		<ul>
+			　　作者提供的<b ico="rar" c-b>实验用nodejs工程们.rar</b>压缩包解压后的node子目录下的文件就是它需要的运行文件，其中<b ico="nodejs" c-b>node.exe</b>是主程序文件，是一个控制台程序；<br>
+			　　为保证平台可用性，压缩包中node的版本是<b c-r>v12.22.12-x86</b>版本。
+		</ul>
+		<li>我喜欢安装</li>
+		<ul>
+			可通过官网<a href="https://nodejs.org"><b c-b>nodejs.org</b></a>下载相应的安装包进行安装；注意：node传统版本号第一个数字（大版本）为偶数的是稳定版本，奇数的是非稳定版，建议使用稳定版。安装方式和绿色解压方式的区别是：<br>
+			1.安装包会自动设置<b c-g>系统环境变量</b><b c-b>PATH</b>，将node.exe所在路径加入其中（参见“运行”，也可手工设置系统PATH）<br>
+			2.安装过程中如勾选了安装附加工具包，则会安装一系列辅助工具，需要时用于编译第三方模块。
+		</ul>
+	</ul>
+	<li>运行</li>
+	<ul>
+		<li>命令行方式运行工程（发布式运行）</li>
+		<ul>
+			　　<b ico="nodejs" c-b>node.exe</b>是一个控制台程序；需要在<b c-g>命令行界面</b>通过<b c-g>命令行参数</b>指定一个js文件并执行该js文件中的代码。假定你的<b>node.exe</b>在<b ico="folder" c-b>E:\prjs\node</b>目录中，你希望使用node运行文件<b ico tag="JS">E:\prjs\bbs\bbs.js</b>，则可在命令行中这样操作：<br>
+			<div cmd>
+				C:\&gt;cd/d E:\prjs\bbs<i>//设置“当前目录”到js所在目录</i><br>
+				E:\prjs\bbs\&gt;E:\prjs\node\node.exe bbs.js<i>//运行js</i>
+			</div>
+			　　如果你设定了node.exe所在路径到系统<b>环境变量PATH</b>中，命令的第二行可以直接写为：
+			<div cmd>
+				E:\prjs\bbs\&gt;node.exe bbs.js<i>//因有PATH，故不需指定node.exe的路径</i>
+			</div>
+			　　还可以这样：
+			<div cmd>E:\prjs\bbs\&gt;node bbs<i>//后缀".exe"和".js"也可省略</i></div>
+			　　如果没有通过参数指定要执行的js文件，则node.exe启动后进入命令行界面等待用户输入命令。<br>
+			　　以<b ico="rar">实验用nodejs工程们.rar</b>中的<b>图书馆空工程</b>为例，假设压缩包解压到<b>E:\DBSTest</b>目录：
+			<div cmd>
+				C:\&gt;cd/d E:\DBSTest\图书馆空工程<i>//设置“当前目录”到app.js所在目录</i><br>
+				E:\DBSTest\图书馆空工程\&gt;..\node\node app<i>//运行app.js</i>
+			</div>
+			　　随后即可在浏览器中通过<a href="http://127.0.0.1" target="_blank">http://127.0.0.1</a>访问该应用
+			</ul>
+		<li>VSCode调试方式运行（可以设定断点）</li>
+		<ul>
+			<li>下载安装合适的<b ico="vscode" c-b>VSCode</b></li>
+			<ol>
+				建议下载安装微软的<b ico="vscode" c-b>VSCode</b>作为调试运行工具。使用VSCode调试nodejs项目要满足两个条件：
+				<li s lst>VSCode要<b c-r>能找到node.exe</b>：这就需要<b>安装</b>nodejs，<b>或手工</b>将node.exe所在路径加入<b c-g>环境变量</b>中:<q code>我的电脑→属性→系统信息→高级系统设置→环境变量→系统变量→Path→编辑</q></li>
+				<li s lst>VSCode和node.exe的<b c-r>版本要匹配</b>，比如x64位和x86的就不匹配；VSCode版本过高也不匹配版本过低的nodejs（一般差异不太大都没有问题）<br>
+					PS:目前在win7中能使用的最高版nodejs是v12.22.12，最高版VSCode是v1.70.2
+				</li>
+			</ol>
+			<li>建立VSCode工程(项目)</li>
+			<ul>
+				<li s lst>VSCode是以<b>目录为单位管理工程项目</b>的，一般一个工程项目对应着项目的根目录（一般是项目入口js文件所在的目录）。</li>
+				<li s lst>可以通过<b c-b>文件→打开文件夹</b>打开或新添项目目录；每个添加的项目目录都被称为“<b ico="folder" c-r>工作文件夹</b>”</li>
+			</ul>
+			<li>调试启动项设置</li>
+			<ul>
+				<li s lst>可以通过<b c-b>运行→添加配置→Node.js</b>即可产生调试启动配置文件<b ico tag="JSON" c-808 code>launch.json</b>或添加启动项</li>
+				<li s lst><b ico tag="JSON" c-808 code>launch.json</b>中的配置项可以有多个，可以手工编辑;</li>
+				<li s lst>通过修改<b c-b>"program"</b>参数可指定要运行的的js入口文件；需要注意的是：配置参数中的<q>${workspaceFolder}</q>指的就是“<b ico="folder" c-r>工作文件夹</b>”</li>
+				<li s lst>设置完成后通过点击左侧的<b>调试图标</b>进入“运行和调试面板”就能选择启动项进行调试了</li>
+				<li s lst>本文作者提供的<b ico="rar" c-f80>实验用nodejs工程们.rar</b>中提供了<b ico tag="JSON" code c-808>调试项目配置样例_launch.json</b>文件供参考</li>
+			</ul>
+			<li s><b ico="folder" c-f80 code c-808>node_modules</b>和<b ico tag="JSON" c-808 code>package.json</b></li>
+			<ul>
+				<li s lst>nodejs的项目可能使用一些第三方写的模块提供的功能</li>
+				<li s lst>这些第三方模块就存放在<b ico="folder" code c-f80>node_modules</b>这个特殊的目录中</li>
+				<li s lst><b ico tag="JSON" c-808 code>package.json</b>是用于设置工程使用了哪些第三方模块库的文件，如果一个目录下有正确的<b code>package.json</b>文件，则该目录下使用命令行：
+					<div cmd>E:\有package.json文件的目录\&gt;npm install<i>//npm的更多用途自行搜索</i></div>
+					可创建<b code>node_modules</b>子目录，并下载相应的模块文件
+				</li>
+				<li s>当js文件引用外部模块时:<b code>require(<q>"模块标识"</q>)</b></li>
+				<ul>
+					<li s>当模块标识以<q>'/'</q>,<q>'./'</q>,<q>'../'</q>路径标识符开始时，则仅在路径标识符指定路径中查找模块(相对于js文件所在目录)：</li>
+					<ul>
+						<li s lst>如明确指定了扩展名，则严格按名称查找；</li>
+						<li s lst>如果没有指定扩展名，则按扩展名为<q>'.js'</q>、 <q>'.json'</q>、 <q>'.node'</q>的优先级依次查找；最后查找是否拥有对应模块标识符的文件夹，然后引入该包中的入口文件，默认为 index.js ；</li>
+					</ul>
+					<li s>当模块标识不以<q>'/'</q>,<q>'./'</q>,<q>'../'</q>等路径标识符开始时：</li>
+					<ul>
+						<li s lst>如明确指定了扩展名，则严格按名称在“<b>当前目录</b>”下的<b>node_modules</b>子文件夹中查找；</li>
+						<li s lst>如果没有指定扩展名，则按扩展名为<q>'.js'</q>、 <q>'.json'</q>、 <q>'.node'</q>的优先级依次查找；最后查找是否拥有对应模块标识符的文件夹，然后引入该包中的入口文件，默认为 index.js ；</li>
+						<li s lst>如果当前目录下不存在<b>node_modules</b>文件夹，那么将会自动向上级目录递归查找<b>node_modules</b>文件夹，直到根目录为止；</li>
+					</ul>
+				</ul>
+			</ul>
+		</ul>
+		<li>运行时常见错误信息</li>
+		<ul>
+			<div cmd showi c-f08>Port 80 is already in use<br><i>//80端口被占用，启动了其他www应用，比如IIS，关闭相应服务</i></div>
+			<div cmd showi c-f08>Error: Cannot find module 'xxx.js'<br><i>//require的"模块标识"参数错误，或找不到引用的模块文件</i></div>
+		</ul>
+	</ul>
+</ul>
+<li s ico="rar"><b>实验用nodejs工程们.rar</b>　内容说明</li>
+<ul>
+	<li s ico tag="HTM">NodeJS工程运行调试说明.htm <i>/*就是你正在看的，本文件*/</i></li>
+	<li s ico tag="JSON">package.json <i>/*本实验工程(项目)的第三方依赖包说明*/</i></li>
+	<li s ico tag="JSON">调试项目配置样例_launch.json<i>/*调试项目配置样例*/</i></li>
+	<li s ico="folder">demo<i>/*放在同一目录下的4个简单示例工程*/</i></li>
+	<ul>
+		<li s ico tag="JS">01_http.js<i>/*演示在88端口简单响应http请求*/</i></li>
+		<li s ico tag="JS">02_form.js<i>/*演示在88端口根据请求发送的form数据做出不同响应*/</i></li>
+		<li s ico tag="JS">03_static.js<i>/*演示在80端口实现静态文本响应；使用了依赖包“serve-static”*/</i></li>
+		<li s ico tag="JS">04_webApp.js<i>/*演示在80端口使用WebApp.js框架使用中间件和路由函数搭建项目*/</i></li>
+		<li s ico tag="JS">WebApp.js<i>/*WebApp，一个兼容express的nodejs框架，被04_webApp.js使用*/</i></li>
+		<li s ico tag="JSON">package.json <i>/*第三方依赖包配置（demo中其实只有03_static.js在用）*/</i></li>
+		<li s ico="folder">static<i>/*静态文件目录*/</i></li>
+		<ul>
+			<li s ico tag="HTM">form.htm <i>/*配合02_form.js使用的htm文件*/</i></li>
+			<li s ico tag="HTM">index.htm <i>/*配合03_static.js使用的htm文件*/</i></li>
+			<li s ico tag="PNG">car.png <i>/*被index.htm使用了的图片*/</i></li>
+		</ul>
+	</ul>
+	<li s ico="folder">bbs<i>/*使用数据库实现的BBS工程*/</i></li>
+	<ul>
+		<li s ico tag="JS">bbs.js<i>/*工程入口js文件*/</i></li>
+		<li s ico tag="JS">WebApp.js<i>/*WebApp模块，一个兼容express的nodejs框架*/</i></li>
+		<li s ico tag="DB">bbs.db<i>/*sqlite3的数据库文件*/</i></li>
+		<li s ico tag="SQL">bbs_db.sql<i>/*对bbs.db的表结构的说明文件*/</i></li>
+		<li s ico tag="JS">coSqlite3.js<i>/*对sqlite3的数据库访问的封装模块，在bbs.js中初始化，并在routes/*.js中使用它提供的方法访问数据库*/</i></li>
+		<li s ico tag="JS">lib.js<i>/*此模块提供了HTML字符串常量和日期格式化为字符串的方法*/</i></li>
+		<li s ico tag="JSON">package.json <i>/*第三方依赖包配置*/</i></li>
+		<li s ico="folder">routes<i>/*业务路由功能函数模块目录*/</i></li>
+		<ul>
+			<li s ico tag="JS">index.js <i>/*使用txt.js和user.js模块完成BBS各功能入口（如登录）在WebApp框架中的路由绑定*/</i></li>
+			<li s ico tag="JS">txt.js <i>/*发帖、看帖、查帖的功能路由函数模块*/</i></li>
+			<li s ico tag="JS">user.js <i>/*注册、可用功能导航、登录、列出用户的功能路由函数模块*/</i></li>
+		</ul>
+		<li s ico="folder">static<i>/*静态文件目录*/</i></li>
+		<ul>
+			<li s ico tag="HTM">bbs.htm <i>/*入口HTML页面*/</i></li>
+			<li s ico tag="HTM">login.htm <i>/*登录页面（提交form给/login）*/</i></li>
+			<li s ico tag="PNG">reg.htm <i>/*注册页面（提交form给/register）*/</i></li>
+			<li s ico tag="PNG">post.htm <i>/*发帖页面（提交form给/post）*/</i></li>
+			<li s ico tag="PNG">query.htm <i>/*查找帖子页面（提交form给/query）*/</i></li>
+		</ul>
+	</ul>
+	<li s ico="folder">图书馆空工程<i>/*使用数据库实现的BBS工程*/</i></li>
+	<ul>
+		<li s ico tag="JS">app.js<i>/*工程入口js文件，通过修改这个文件注册自己的功能路由函数*/</i></li>
+		<li s ico tag="JS">WebApp.js<i>/*WebApp模块，一个兼容express的nodejs框架*/</i></li>
+		<li s ico tag="JS">coSqlite3.js<i>/*对sqlite3的数据库访问的封装模块，在app.js中初始化，提供访问数据库的方法供同学们编写的功能路由函数调用*/</i></li>
+		<li s ico tag="JS">myModule.js<i>/*实现了一个Hello功能路由函数的例子*/</i></li>
+		<li s ico tag="JSON">package.json <i>/*第三方依赖包配置*/</i></li>
+		<li s ico tag="INI">readme.ini <i>/*一个readme.ini的样例，参见：<a href="./图书馆空工程/static/__readme.htm" target="_blank">static/__readme.htm</a>中的相关说明*/</i></li>
+		<li s ico="folder">routes<i>/*可在此目录下写业务路由功能函数模块js文件（此目录非必需）*/</i></li>
+		<li s ico="folder">static<i>/*调试测试用的静态文件目录*/</i></li>
+		<ul>
+			<li s ico tag="HTM">__index.htm <i>/*入口HTML页面*/</i></li>
+			<li s ico tag="HTM">__readme.htm <i>/*<a href="./图书馆空工程/static/__readme.htm" target="_blank">数据库试验提交要求说明页面（嵌入__index.htm）</a>*/</i></li>
+			<li s ico tag="HTM">__form.htm <i>/*接口调用及其说明页面（提交form）（嵌入__index.htm）*/</i></li>
+			<li s ico tag="HTM">__src.htm <i>/*用于功能调用韩慧内容的接收、显示、格式检查的页面（嵌入__index.htm）*/</i></li>
+			<li s ico tag="GIF">__rarErr.gif、__rarMenuErr.gif、__rarMenuOk.gif、__rarOk.gif <i>/*__readme.htm中用的各种图*/</i></li>
+		</ul>
+	</ul>
+	<li s ico="folder">node<i>/*绿色版本nodejs v12.22.12-x86*/</i></li>
+	<li s ico="folder">node_modules<i>/*和node v12.22.12-x86版本配套的工程们用到的第三方模块*/</i></li>
+</ul>
+</body>
+</html>
