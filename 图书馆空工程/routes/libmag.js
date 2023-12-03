@@ -7,7 +7,7 @@ const db = Database("lib.db");
 
 //将检查日期格式封装成函数
 //“yyyy - mm - dd”，如“2008 -08 -09”
-function* checkDate(date) {
+function checkDate(date) {
     const reg = /^\d{4}-\d{2}-\d{2}$/;
     if (!reg.test(date)) {
         return false;
@@ -21,14 +21,14 @@ function* checkDate(date) {
     if (day < 1 || day > 31) {
         return false;
     }
-    if ((month === 4 || month === 6 || month === 9 || month === 11) && day === 31) {
+    if ((month == 4 || month == 6 || month == 9 || month == 11) && day == 31) {
         return false;
     }
-    if (month === 2) {
+    if (month == 2) {
         if (day > 29) {
             return false;
         }
-        if (day === 29 && !((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0)) {
+        if (day == 29 && !((year % 4 == 0 && year % 100 != 0) || year % 400 == 0)) {
             return false;
         }
     }
@@ -141,7 +141,8 @@ exports.AddBook = function* (req, res) {
             res.send('<html><body><div id="result" style="display:none">2</div>提交的参数有误：出版社名不符合格式要求</body></html>');
             return;
         }
-
+        console.log("bDate:", bDate);
+        console.log("checkDate(bDate):", checkDate(bDate));
         // 日期 符合格式 yyyy-mm-dd 如：2008-09-09 可为空
         if(bDate&& !checkDate(bDate)){
             res.send('<html><body><div id="result" style="display:none">2</div>提交的参数有误：出版日期不符合格式要求</body></html>');
@@ -222,7 +223,7 @@ exports.IncreaseBookCount = function* (req, res) {
 
         // 查询来检查书籍是否存在
         const existingBook = yield db.execSQL('SELECT * FROM books WHERE bID = ?', [bID]);
-        if (!existingBook || existingBook.length === 0) {
+        if (!existingBook || existingBook.length == 0) {
             res.send('<html><body><div id="result" style="display:none">1</div>该书不存在</body></html>');
             return;
         }
@@ -272,7 +273,7 @@ exports.DeleteBook = function* (req, res) {
         // 查询来检查书籍是否存在
         const existingBook = yield db.execSQL('SELECT * FROM books WHERE bID = ?', [bID]);
         console.log("existingBook:", existingBook);
-        if (!existingBook || existingBook.length === 0) {
+        if (!existingBook || existingBook.length == 0) {
             res.send('<html><body><div id="result" style="display:none">1</div>该书不存在</body></html>');
             return;
         }
@@ -289,7 +290,9 @@ exports.DeleteBook = function* (req, res) {
 
 
         // 如果将这个书删光了，那么就删除这个书的所有借阅记录，并且删掉这个书
-        if (existingBook[0].bCnt === bCnt) {
+        console.log("bCnt:", existingBook[0].bCnt, "bRemaining:", existingBook[0].bRemaining, bCnt);
+        console.log("bCnt == bCnt:", existingBook[0].bCnt == bCnt);
+        if (existingBook[0].bCnt == bCnt) {
             // 删除这个书相关的借阅记录 (解决外键约束)
             yield db.execSQL('DELETE FROM loan_records WHERE bID = ?', [bID]);
             yield db.execSQL('DELETE FROM books WHERE bID = ?', [bID]);
@@ -363,7 +366,7 @@ exports.ModifyBookInfo = function* (req, res) {
         // 检查书籍是否存在
         const existingBook = yield db.execSQL('SELECT * FROM books WHERE bID = ?', [bID]);
 
-        if (!existingBook || existingBook.length === 0) {
+        if (!existingBook || existingBook.length == 0) {
             res.send('<html><body><div id="result" style="display:none">1</div>该书不存在</body></html>');
             return;
         }
@@ -595,7 +598,7 @@ exports.ModifyReaderInfo = function* (req, res) {
 
         // 查询是否存在相同的证号
         const existingReader = yield db.execSQL('SELECT * FROM readers WHERE rID = ?', [rID]);
-        if (!existingReader || existingReader.length === 0) {
+        if (!existingReader || existingReader.length == 0) {
             res.send('<html><body><div id="result" style="display:none">1</div>该证号不存在</body></html>');
             return;
         }
@@ -743,14 +746,14 @@ exports.ReturnBook = function* (req, res) {
 
         // 从readers表中查询rID是否存在
         const existingReader = yield db.execSQL('SELECT * FROM readers WHERE rID = ?', [rID]);
-        if (!existingReader || existingReader.length === 0) {
+        if (!existingReader || existingReader.length == 0) {
             res.send('<html><body><div id="result" style="display:none">1</div>该证号不存在</body></html>');
             return;
         }
 
         // 从books表中查询bID是否存在
         const existingBook = yield db.execSQL('SELECT * FROM books WHERE bID = ?', [bID]);
-        if (!existingBook || existingBook.length === 0) {
+        if (!existingBook || existingBook.length == 0) {
             res.send('<html><body><div id="result" style="display:none">2</div>该书号不存在</body></html>');
             return;
         }
@@ -762,7 +765,7 @@ exports.ReturnBook = function* (req, res) {
         
 
         // 如果借阅记录不存在，则说明读者未借阅该书
-        if (!loanRecord || loanRecord.length === 0) {
+        if (!loanRecord || loanRecord.length == 0) {
             res.send('<html><body><div id="result" style="display:none">3</div>该读者并未借阅该书</body></html>');
             return;
         }
@@ -800,14 +803,14 @@ exports.BorrowBook = function* (req, res) {
         }
         //从readers表中查询rID是否存在
         const existingReader = yield db.execSQL('SELECT * FROM readers WHERE rID = ?', [rID]);
-        if (!existingReader || existingReader.length === 0) {
+        if (!existingReader || existingReader.length == 0) {
             res.send('<html><body><div id="result" style="display:none">1</div>该证号不存在</body></html>');
             return;
         }
 
         //从books表中查询bID是否存在
         const existingBook = yield db.execSQL('SELECT * FROM books WHERE bID = ?', [bID]);
-        if (!existingBook || existingBook.length === 0) {
+        if (!existingBook || existingBook.length == 0) {
             res.send('<html><body><div id="result" style="display:none">2</div>该书号不存在</body></html>');
             return;
         }
@@ -880,7 +883,7 @@ exports.DeleteReader = function* (req, res) {
         }
         // 查询该证号是否存在
         const existingReader = yield db.execSQL('SELECT * FROM readers WHERE rID = ?', [rID]);
-        if (!existingReader || existingReader.length === 0) {
+        if (!existingReader || existingReader.length == 0) {
             res.send('<html><body><div id="result" style="display:none">1</div>该证号不存在</body></html>');
             return;
         }
@@ -928,7 +931,7 @@ exports.CheckUnreturnedBooks = function* (req, res) {
 
         // 查询该证号是否存在
         const existingReader = yield db.execSQL('SELECT * FROM readers WHERE rID = ?', [rID]);
-        if (!existingReader || existingReader.length === 0) {
+        if (!existingReader || existingReader.length == 0) {
             res.send('<html><body><div id="result" style="display:none">1</div>该证号不存在</body></html>');
             return;
         }
@@ -953,7 +956,7 @@ exports.CheckUnreturnedBooks = function* (req, res) {
 
 
         // 如果该读者目前没有任何在借书籍，则返回空表格
-        if (!unreturnedBooks || unreturnedBooks.length === 0) {
+        if (!unreturnedBooks || unreturnedBooks.length == 0) {
             res.send('<html><head><META HTTP-EQUIV="Content-Type" Content="text-html;charset=utf-8"></head><body><table border=1 id="result"></table></body></html>');
             return;
         }
@@ -999,7 +1002,7 @@ exports.GetOverdueReaders = function* (req, res) {
   
 
         // 没有读者满足条件  返回空表格
-        if (!overdueReaders || overdueReaders.length === 0) {
+        if (!overdueReaders || overdueReaders.length == 0) {
             res.send('<html><head><META HTTP-EQUIV="Content-Type" Content="text-html;charset=utf-8"></head><body><table border=1 id="result"></table></body></html>');
             return;
         }
